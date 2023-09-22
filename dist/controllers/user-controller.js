@@ -22,8 +22,17 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.create = void 0;
+exports.countUsage = exports.create = void 0;
 const mongoose = __importStar(require("mongoose"));
 const user_1 = require("../models/user");
 const User = mongoose.model('User', user_1.UserSchema);
@@ -32,4 +41,17 @@ function create(user) {
     return newUser.save();
 }
 exports.create = create;
+function countUsage(userId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let user = yield User.findOne({ clerkUserId: userId }).exec();
+        if (!user) {
+            yield create({ clerkUserId: userId, usageCount: 1 });
+        }
+        else {
+            user.usageCount = user.usageCount + 1;
+            yield user.save();
+        }
+    });
+}
+exports.countUsage = countUsage;
 //# sourceMappingURL=user-controller.js.map

@@ -27,16 +27,13 @@ exports.UserSchema = void 0;
 const mongoose = __importStar(require("mongoose"));
 const Schema = mongoose.Schema;
 exports.UserSchema = new Schema({
-    firstName: {
+    clerkUserId: {
         type: String,
-        required: 'Enter a first name'
+        required: true
     },
-    lastName: {
-        type: String,
-        required: 'Enter a first name'
-    },
-    email: {
-        type: String
+    usageCount: {
+        type: Number,
+        default: 0
     }
 });
 //# sourceMappingURL=user.js.map

@@ -19,3 +19,13 @@ export async function countUsage(userId: string) {
   }
   
 }
+
+export function getUserByClerckId(clerkUserId: string){
+  return User.findOne({ clerkUserId: clerkUserId }).exec();
+}
+
+export async function updateKey(userId: string, key: string){
+  const user = await User.findOne({ clerkUserId: userId }).exec();
+  user.key = key
+  await user.save()
+}

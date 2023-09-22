@@ -34,7 +34,6 @@ app.use('/users', userRoutes)
 app.use('/search', searchRoutes)
 
 app.use((err: ErrorRequestHandler & { stack: any }, req: Request, res: Response, next: NextFunction) => {
-  console.log(123)
   console.error(err?.stack);
   res.status(401).send('Unauthenticated!');
 });

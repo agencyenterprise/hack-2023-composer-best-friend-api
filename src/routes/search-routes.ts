@@ -14,6 +14,7 @@ router.get('/', ClerkExpressRequireAuth({}), async (req, res) => {
   // Set the Content-Type header to 'audio/midi'
   res.setHeader('Content-Type', 'audio/midi');
 
+  //TODO If request is ok we then will count usage
   if(true){
     await countUsage(req.auth.userId)
   }

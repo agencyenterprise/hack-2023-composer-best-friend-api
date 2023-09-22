@@ -16,12 +16,15 @@ app.use(express_1.default.json());
 app.get("/", (req, res) => {
     res.send("Hello world!");
 });
-app.use('/users', user_routes_1.router);
-app.use('/search', search_routes_1.router);
+app.use("/users", user_routes_1.router);
+app.use("/search", search_routes_1.router);
 // start the Express server
 app.listen(process.env.PORT, () => {
     mongoose_1.default.Promise = global.Promise;
-    mongoose_1.default.connect(process.env.DATABASE_URL, { useNewUrlParser: true });
+    mongoose_1.default.connect(process.env.DATABASE_URL, {
+        useNewUrlParser: true,
+        dbName: "composer-pal",
+    });
     console.log(`server started at http://localhost:${process.env.PORT}`);
 });
 //# sourceMappingURL=index.js.map

@@ -53,7 +53,8 @@ async function generateInitialVariations(query: string) {
 }
 
 async function generateMidiFiles(variations: Array<any>): Promise<Array<any>> {
-  const dateAsName = new Date().toISOString().replace(/:/g, '-');
+  const isSimulated = process.env.SIMULATE_GENERATION === 'true';
+  const folderName = `${new Date().toISOString().replace(/:/g, '-')}${isSimulated ? '-simulated' : ''}`;
   const midis = [];
 
   for (let i = 0; i < variations.length; i++) {
@@ -68,16 +69,16 @@ async function generateMidiFiles(variations: Array<any>): Promise<Array<any>> {
 
     const write = new MidiWriter.Writer(track);
 
-    if (process.env.SIMULATE_GENERATION === 'true') {
-      if (!fs.existsSync(`outputs/${dateAsName}`)) {
-        fs.mkdirSync(`outputs/${dateAsName}`, { recursive: true });
-      }
-
-      // Write file to disk
-      fs.writeFile(`outputs/${dateAsName}/variation-${i + 1}.midi`, write.base64(), 'base64', function (err) {
-        console.log(err);
-      });
+    if (!fs.existsSync(`outputs/${folderName}`)) {
+      fs.mkdirSync(`outputs/${folderName}`, { recursive: true });
     }
+
+    // Write file to disk
+    fs.writeFile(`outputs/${folderName}/variation-${i + 1}.midi`, write.base64(), 'base64', function (err) {
+      if (err) {
+        console.log(err);
+      }
+    });
 
     midis.push(write);
   }
@@ -135,7 +136,7 @@ async function generateMidiPatterns(variations: Array<string>) {
 }
 
 router.get('/', /* ClerkExpressRequireAuth({}),*/ async (req, res) => {
-  const { query } = req.query;
+  const { mode, query } = req.query;
 
   // Activate that later
   // const { usageCount: countUsageTotal, key } = await getUserByClerckId(req.auth.userId);
@@ -146,28 +147,45 @@ router.get('/', /* ClerkExpressRequireAuth({}),*/ async (req, res) => {
 
   res.setHeader('Content-Type', 'audio/midi');
 
-  try {
-    // let midiPatterns = [];
-    let midiFiles: any[] = [];
+  if (mode === 'presentation') {
+    const folder = `${query}`.indexOf('rem') > -1 ? `./examples/rem` : './examples/happy';
+    console.log('Presentation mode, send all files from examples folder');
 
-    if (process.env.SIMULATE_GENERATION !== 'true') {
-      const chordVariations = await generateInitialVariations(query as string);
-      const midiResponse = await generateMidiPatterns(chordVariations);
+    fs.readdir(folder, (err, files) => {
+      if (err) {
+        console.log('error', err);
+        return res.status(500).json({ error: 'Something went wrong' });
+      }
 
-      console.log('midiResponse', midiResponse);
-
-      midiFiles = await generateMidiFiles(midiResponse.variations);
-    } else {
-      midiFiles = await generateMidiFiles(mockedResponse.variations);
-    }
-
-    return res.send(midiFiles);
-  } catch (error) {
-    console.log(error);
-
-    return res.status(500).send({
-      details: error,
-      error: 'Something went wrong'
+      setTimeout(() => {
+        return res.send(files);
+      }, 10000);
     });
+
+    // const data = await fs.readFileSync('./MIDI_sample.mid');
+  } else {
+    try {
+      let midiFiles: any[] = [];
+
+      if (process.env.SIMULATE_GENERATION !== 'true') {
+        const chordVariations = await generateInitialVariations(query as string);
+        const midiResponse = await generateMidiPatterns(chordVariations);
+
+        console.log('midiResponse', midiResponse);
+
+        midiFiles = await generateMidiFiles(midiResponse.variations);
+      } else {
+        midiFiles = await generateMidiFiles(mockedResponse.variations);
+      }
+
+      return res.send(midiFiles);
+    } catch (error) {
+      console.log(error);
+
+      return res.status(500).send({
+        details: error,
+        error: 'Something went wrong'
+      });
+    }
   }
 })

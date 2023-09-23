@@ -152,73 +152,71 @@ async function generateMidiPatterns(variations: Array<string>) {
   return JSON.parse(content);
 }
 
-router.get(
-  "/",
-  /* ClerkExpressRequireAuth({}),*/ async (req, res) => {
-    const { mode, query } = req.query;
+router.get("/", ClerkExpressRequireAuth({}), async (req, res) => {
+  const { mode, query } = req.query;
 
-    // Activate that later
-    // const { usageCount: countUsageTotal, key } = await getUserByClerckId(req.auth.userId);
+  const { usageCount: countUsageTotal, key } = await getUserByClerckId(
+    req.auth.userId
+  );
 
-    // if (countUsageTotal > 3 && !key) {
-    //   return res.status(400).json({ error: 'Usage limit reached' });
-    // }
+  if (countUsageTotal > 3 && !key) {
+    return res.status(400).json({ error: "Usage limit reached" });
+  }
 
-    res.setHeader("Content-Type", "audio/midi");
+  res.setHeader("Content-Type", "audio/midi");
 
-    if (mode === "presentation" || process.env.MODE === "presentation") {
-      const folder =
-        `${query}`.toLowerCase().indexOf("rem") > -1
-          ? `./examples/rem`
-          : "./examples/happy";
+  if (mode === "presentation" || process.env.MODE === "presentation") {
+    const folder =
+      `${query}`.toLowerCase().indexOf("rem") > -1
+        ? `./examples/rem`
+        : "./examples/happy";
 
-      console.log("Presentation mode, send all files from examples folder");
+    console.log("Presentation mode, send all files from examples folder");
 
-      fs.readdir(folder, (err, filesNames) => {
-        if (err) {
-          console.log("error", err);
-          return res.status(500).json({ error: "Something went wrong" });
-        }
-
-        const files: any[] = [];
-
-        for (const fileName of filesNames) {
-          const file = fs.readFileSync(`${folder}/${fileName}`);
-          files.push(file);
-        }
-
-        setTimeout(() => {
-          return res.send(files);
-        }, 10000);
-      });
-
-      // const data = await fs.readFileSync('./MIDI_sample.mid');
-    } else {
-      try {
-        let midiFiles: any[] = [];
-
-        if (process.env.SIMULATE_GENERATION !== "true") {
-          const chordVariations = await generateInitialVariations(
-            query as string
-          );
-          const midiResponse = await generateMidiPatterns(chordVariations);
-
-          console.log("midiResponse", midiResponse);
-
-          midiFiles = await generateMidiFiles(midiResponse.variations);
-        } else {
-          midiFiles = await generateMidiFiles(mockedResponse.variations);
-        }
-
-        return res.send(midiFiles);
-      } catch (error) {
-        console.log(error);
-
-        return res.status(500).send({
-          details: error,
-          error: "Something went wrong",
-        });
+    fs.readdir(folder, (err, filesNames) => {
+      if (err) {
+        console.log("error", err);
+        return res.status(500).json({ error: "Something went wrong" });
       }
+
+      const files: any[] = [];
+
+      for (const fileName of filesNames) {
+        const file = fs.readFileSync(`${folder}/${fileName}`);
+        files.push(file);
+      }
+
+      setTimeout(() => {
+        return res.send(files);
+      }, 10000);
+    });
+
+    // const data = await fs.readFileSync('./MIDI_sample.mid');
+  } else {
+    try {
+      let midiFiles: any[] = [];
+
+      if (process.env.SIMULATE_GENERATION !== "true") {
+        const chordVariations = await generateInitialVariations(
+          query as string
+        );
+        const midiResponse = await generateMidiPatterns(chordVariations);
+
+        console.log("midiResponse", midiResponse);
+
+        midiFiles = await generateMidiFiles(midiResponse.variations);
+      } else {
+        midiFiles = await generateMidiFiles(mockedResponse.variations);
+      }
+
+      return res.send(midiFiles);
+    } catch (error) {
+      console.log(error);
+
+      return res.status(500).send({
+        details: error,
+        error: "Something went wrong",
+      });
     }
   }
-);
+});

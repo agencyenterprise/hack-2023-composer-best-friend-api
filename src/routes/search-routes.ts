@@ -17,6 +17,11 @@ const openai = new OpenAI({
 
 export const router = Router();
 
+function base64ToArrayBuffer(base64: string) {
+  var buffer = Buffer.from(base64, "base64");
+  return Uint8Array.from(buffer).buffer;
+}
+
 async function generateInitialVariations(query: string) {
   // Ask OpenAI to create chord progressions for a song based on the input song
   const systemGuidelines = [
@@ -90,10 +95,9 @@ async function generateMidiFiles(variations: Array<any>): Promise<Array<any>> {
     //   }
     // );
 
-    // @ts-ignore
-    const [_, midiData] = write.buildData();
-    console.log({ midiData });
-    midis.push(midiData.data);
+    const base = write.base64();
+    const buffer = Buffer.from(base, "base64");
+    midis.push(buffer);
   }
 
   return midis;

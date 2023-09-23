@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.countUsage = exports.create = void 0;
+exports.updateKey = exports.getUserByClerckId = exports.countUsage = exports.create = void 0;
 const mongoose = __importStar(require("mongoose"));
 const user_1 = require("../models/user");
 const User = mongoose.model('User', user_1.UserSchema);
@@ -54,4 +54,16 @@ function countUsage(userId) {
     });
 }
 exports.countUsage = countUsage;
+function getUserByClerckId(clerkUserId) {
+    return User.findOne({ clerkUserId: clerkUserId }).exec();
+}
+exports.getUserByClerckId = getUserByClerckId;
+function updateKey(userId, key) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield User.findOne({ clerkUserId: userId }).exec();
+        user.key = key;
+        yield user.save();
+    });
+}
+exports.updateKey = updateKey;
 //# sourceMappingURL=user-controller.js.map

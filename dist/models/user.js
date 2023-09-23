@@ -34,6 +34,9 @@ exports.UserSchema = new Schema({
     usageCount: {
         type: Number,
         default: 0
+    },
+    key: {
+        type: String
     }
 });
 //# sourceMappingURL=user.js.map

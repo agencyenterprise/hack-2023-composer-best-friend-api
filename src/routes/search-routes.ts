@@ -183,9 +183,9 @@ router.get(
           files.push(file);
         }
 
-        // setTimeout(() => {
-        return res.send(files);
-        // }, 10000);
+        setTimeout(() => {
+          return res.send(files);
+        }, 10000);
       });
 
       // const data = await fs.readFileSync('./MIDI_sample.mid');

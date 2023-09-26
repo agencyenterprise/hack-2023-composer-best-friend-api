@@ -10,11 +10,18 @@ async function createUser(user: any) {
 }
 
 export async function create(clerkUserId: string) {
-  let user = await User.findOne({ clerkUserId: clerkUserId }).exec();
-  if (!user) {
-    await createUser({ clerkUserId: clerkUserId, usageCount: 0 });
-    return user.save();
+  let user: any;
+
+  try {
+    user = await User.findOne({ clerkUserId: clerkUserId }).exec();
+  } catch (err) {
+    console.log(err);
   }
+
+  if (!user) {
+    user = await createUser({ clerkUserId: clerkUserId, usageCount: 0 });
+  }
+
   return user;
 }
 
